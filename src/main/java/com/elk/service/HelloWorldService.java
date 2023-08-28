@@ -1,8 +1,11 @@
 package com.elk.service;
 
+import com.elk.aspect.logger.RemoteLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import static com.elk.config.CommonConst.GRPC_ADDRESS;
 
 @Service
 @Slf4j
@@ -14,15 +17,14 @@ public class HelloWorldService {
         this.restTemplate = restTemplate;
     }
 
-
-    public String sayHello() {
-        log.info("Returning hello from service");
-        restTemplate.getForEntity("http://localhost:8080/other", String.class);
+    @RemoteLogger("sayHello() method is called")
+    public String sayHello(String words) {
+        restTemplate.getForEntity(GRPC_ADDRESS, String.class);
         return "hello";
     }
 
+    @RemoteLogger("fakeBadCall() method is called")
     public void fakeBadCall() {
-        log.info("About to throw IllegalArgumentException...");
         throw new IllegalArgumentException("Exception from Hello World Service");
     }
 }

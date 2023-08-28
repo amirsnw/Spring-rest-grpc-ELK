@@ -12,23 +12,37 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import static net.logstash.logback.argument.StructuredArguments.v;
 
 @Component
 @Aspect
 public class RemoteLoggerAspect {
 
-    @Before("@annotation(com.elk.aspect.logger.RemoteLogger)")
+    @Before("@annotation(RemoteLogger)")
     public void afterReturningWithAnnotation(JoinPoint joinPoint)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
-        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = (signature).getMethod();
         RemoteLogger logger = method.getAnnotation(RemoteLogger.class);
         String payload = logger.value();
         Logger log = LoggerFactory.getLogger(method.getDeclaringClass());
         Method loggerMethod = log.getClass()
-                .getDeclaredMethod(logger.type().name().toLowerCase(), String.class, Object.class);
+                .getDeclaredMethod(logger.type().name().toLowerCase(), String.class, Object[].class);
 
-        loggerMethod.invoke(log, payload);
+        List<Object> keyValueList = new ArrayList<>();
+        Iterator<Object> paramValues = Arrays.stream(joinPoint.getArgs()).iterator();
+        Iterator<String> paramNames = Arrays.stream(signature.getParameterNames()).iterator();
+        while (paramValues.hasNext()) {
+            keyValueList.add(v(paramNames.next(), paramValues.next()));
+        }
+
+        loggerMethod.invoke(log, payload, keyValueList.toArray());
     }
 
     @Around("@within(com.elk.aspect.logger.RemoteLogger)")
