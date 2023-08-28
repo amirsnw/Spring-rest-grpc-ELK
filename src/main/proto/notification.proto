@@ -1,0 +1,17 @@
+syntax = "proto3";
+package product;
+
+option java_package = "com.elk.product.api";
+option java_multiple_files = true;
+
+service NotificationService {
+  rpc GetNotified(NotificationRequest) returns (NotificationResponse);
+}
+
+message NotificationRequest {
+  string question = 1;
+}
+
+message NotificationResponse {
+  string response = 1;
+}
