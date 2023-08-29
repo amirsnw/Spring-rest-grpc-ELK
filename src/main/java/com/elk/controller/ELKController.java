@@ -1,6 +1,7 @@
 package com.elk.controller;
 
 import com.elk.aspect.logger.RemoteLogger;
+import com.elk.model.WelcomePackage;
 import com.elk.service.HelloWorldService;
 import com.elk.service.grpc.client.HelloWorldGrpcClient;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,8 @@ public class ELKController {
     @GetMapping("/hello")
     @RemoteLogger("/hello endpoint called")
     public ResponseEntity<String> sayHello() {
-        return ResponseEntity.ok(helloWorldService.sayHello("Hello"));
+        return ResponseEntity.ok(helloWorldService
+                .sayHello(new WelcomePackage("Amy", "Hello"), "my friend"));
     }
 
     @GetMapping("/hello-grpc")

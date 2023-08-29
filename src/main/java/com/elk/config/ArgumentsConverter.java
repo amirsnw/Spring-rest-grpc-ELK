@@ -2,33 +2,25 @@ package com.elk.config;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+
+import java.util.Map;
 
 public class ArgumentsConverter extends ClassicConverter {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     @Override
+    @SneakyThrows
     public String convert(ILoggingEvent event) {
         Object[] arguments = event.getArgumentArray();
 
-        if (arguments != null) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("[");
-
-            for (int i = 0; i < arguments.length; i++) {
-                Object argument = arguments[i];
-                if (!argument.toString().contains(":")) {
-                    continue;
-                }
-                builder.append("\"").append(argument).append("\"");
-
-                if (i < arguments.length - 1) {
-                    builder.append(",");
-                }
-            }
-
-            builder.append("]");
-            return builder.toString();
+        if (arguments[0] instanceof Map<?, ?>) {
+            return mapper.writeValueAsString(arguments[0].toString());
+            // return arguments[0].toString();
         }
 
-        return "[]";
+        return "";
     }
 }

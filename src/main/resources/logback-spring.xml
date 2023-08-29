@@ -16,7 +16,9 @@
         <appender name="LOGSTASH" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
                 <providers>
-                    <timestamp/>
+                    <timestamp>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
                     <!--<version/>-->
                     <message/>
                     <loggerName/>
@@ -24,12 +26,16 @@
                     <logLevel/>
                     <!--<mdc/>-->
                     <!--<arguments/>-->
+                    <!-- Assign logger fields to JSON object -->
                     <pattern>
                         <pattern>
                             {
                             "service": "${microservice:-}",
+                            "pid": ${PID:-},
+                            "thread": "%thread",
                             "traceId": "%mdc{traceId}",
                             "spanId": "%mdc{spanId}",
+                            "isAspect": "%mdc{isAspect}",
                             "arguments": "%arguments"
                             }
                         </pattern>
