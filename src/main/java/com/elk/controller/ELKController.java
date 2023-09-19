@@ -7,6 +7,7 @@ import com.elk.service.grpc.client.HelloWorldGrpcClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,11 +25,13 @@ public class ELKController {
         this.grpcClient = grpcClient;
     }
 
-    @GetMapping("/hello")
-    @RemoteLogger("/hello endpoint called")
-    public ResponseEntity<String> sayHello() {
+    @GetMapping("/hello/{name}")
+    @RemoteLogger(message = "/hello endpoint called",
+            type = RemoteLogger.LogType.SELECTION,
+            argumentsIndex = {1})
+    public ResponseEntity<String> sayHello(@PathVariable("name") String name) {
         return ResponseEntity.ok(helloWorldService
-                .sayHello(new WelcomePackage("Amy", "Hello"), "my friend"));
+                .sayHello(new WelcomePackage(name, "Hello"), "my friend"));
     }
 
     @GetMapping("/hello-grpc")
@@ -38,7 +41,7 @@ public class ELKController {
     }
 
     @GetMapping("/bad-call")
-    @RemoteLogger("/bad-call endpoint called")
+    @RemoteLogger("/other endpoint called")
     public void badCall() {
         log.info("Someone called the /bad-call endpoint");
         helloWorldService.fakeBadCall();

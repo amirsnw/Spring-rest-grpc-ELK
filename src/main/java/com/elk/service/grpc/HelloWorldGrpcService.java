@@ -17,8 +17,8 @@ public class HelloWorldGrpcService extends NotificationServiceGrpc.NotificationS
 
     public final HelloWorldGrpcClient client;
 
-    @RemoteLogger("[getNotified] endpoint called")
     @Override
+    @RemoteLogger("[getNotified] endpoint called")
     public void getNotified(NotificationRequest request, StreamObserver<NotificationResponse> responseObserver) {
         responseObserver.onNext(
                 NotificationResponse.newBuilder()
@@ -29,8 +29,8 @@ public class HelloWorldGrpcService extends NotificationServiceGrpc.NotificationS
         responseObserver.onCompleted();
     }
 
-    @RemoteLogger("[getGoodLuckNotify] endpoint called")
     @Override
+    @RemoteLogger("[getGoodLuckNotify] endpoint called")
     public void getGoodLuckNotify(NotificationRequest request, StreamObserver<NotificationResponse> responseObserver) {
         responseObserver.onNext(
                 NotificationResponse.newBuilder()

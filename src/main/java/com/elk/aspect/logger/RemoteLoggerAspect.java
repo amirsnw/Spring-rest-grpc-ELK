@@ -1,6 +1,5 @@
 package com.elk.aspect.logger;
 
-import lombok.SneakyThrows;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -12,10 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 @Component
@@ -23,26 +21,50 @@ import java.util.Map;
 public class RemoteLoggerAspect {
 
     @Before("@annotation(RemoteLogger)")
-    @SneakyThrows
     public void afterReturningWithAnnotation(JoinPoint joinPoint) {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = (signature).getMethod();
         RemoteLogger logger = method.getAnnotation(RemoteLogger.class);
         String payload = logger.value();
-        Logger log = LoggerFactory.getLogger(method.getDeclaringClass());
-        Method loggerMethod = log.getClass()
-                .getDeclaredMethod(logger.type().name().toLowerCase(), String.class, Object[].class);
+        RemoteLogger.LogType logType = logger.type();
+        int[] argsIndex = logger.argumentsIndex();
 
-        Map<String, String> arguments = new HashMap<>();
-        Iterator<Object> paramValues = Arrays.stream(joinPoint.getArgs()).iterator();
-        Iterator<String> paramNames = Arrays.stream(signature.getParameterNames()).iterator();
-        while (paramValues.hasNext()) {
-            arguments.put(paramNames.next(), paramValues.next().toString().trim());
+        Map<String, Object> arguments = new HashMap<>();
+        Object[] paramValues = joinPoint.getArgs();
+        String[] paramNames = signature.getParameterNames();
+        switch (logType) {
+            case ALL:
+                for (var i = 0; i < joinPoint.getArgs().length; i++) {
+                    arguments.put(paramNames[i], paramValues[i]);
+                }
+                break;
+            case SELECTION:
+                for (int index : argsIndex) {
+                    if (index > joinPoint.getArgs().length) {
+                        throw new IllegalArgumentException("Log index not valid");
+                    }
+                    if (index < 1) {
+                        throw new IllegalArgumentException("Log index start from 1");
+                    }
+                    index--;
+                    arguments.put(paramNames[index], paramValues[index]);
+                }
+                break;
+            case NONE:
+                break;
         }
 
-        try (var ignored = MDC.putCloseable("isAspect", "true")) {
-            loggerMethod.invoke(log, payload, new Object[]{arguments});
+        try {
+            Logger log = LoggerFactory.getLogger(method.getDeclaringClass());
+            Method loggerMethod = log.getClass()
+                    .getDeclaredMethod(logger.level().name().toLowerCase(), String.class, Object[].class);
+
+            try (var ignored = MDC.putCloseable("isAspect", "true")) {
+                loggerMethod.invoke(log, payload, new Object[]{arguments});
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Logger not found");
         }
     }
 

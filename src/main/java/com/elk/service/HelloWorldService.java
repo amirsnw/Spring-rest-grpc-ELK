@@ -18,7 +18,8 @@ public class HelloWorldService {
         this.restTemplate = restTemplate;
     }
 
-    @RemoteLogger("sayHello() method is called")
+    @RemoteLogger(message = "sayHello() method is called",
+            type = RemoteLogger.LogType.ALL)
     public String sayHello(WelcomePackage welcomePackage, String otherMessage) {
         restTemplate.getForEntity(GRPC_ADDRESS, String.class);
         return "hello";

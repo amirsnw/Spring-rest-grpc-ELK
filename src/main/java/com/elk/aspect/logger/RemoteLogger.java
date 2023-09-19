@@ -16,10 +16,18 @@ public @interface RemoteLogger {
     @AliasFor("value")
     String message() default "";
 
-    LogLevel type() default LogLevel.INFO;
+    LogLevel level() default LogLevel.INFO;
+
+    LogType type() default LogType.NONE;
+
+    int[] argumentsIndex() default {};
 
     enum LogLevel {
         ERROR, WARN, INFO, DEBUG, TRACE;
+    }
+
+    enum LogType {
+        ALL, NONE, SELECTION;
     }
 
 }

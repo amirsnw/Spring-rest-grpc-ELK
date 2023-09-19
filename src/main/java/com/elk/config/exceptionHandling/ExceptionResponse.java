@@ -1,4 +1,4 @@
-package com.elk.config.exceptionhandler;
+package com.elk.config.exceptionHandling;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

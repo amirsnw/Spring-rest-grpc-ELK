@@ -1,4 +1,4 @@
-package com.elk.config.exceptionhandler;
+package com.elk.config.exceptionHandling;
 
 import com.elk.config.ContextHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +18,11 @@ public class HttpExceptionHandler {
         this.contextHolder = contextHolder;
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException exception) {
         log.warn(exception.getMessage(), exception);
-        var exceptionResponse = new ExceptionResponse(HttpStatus.BAD_REQUEST, exception, contextHolder.getTraceId(), contextHolder.getSpanId());
+        var exceptionResponse = new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception, contextHolder.getTraceId(), contextHolder.getSpanId());
         return new ResponseEntity<>(exceptionResponse, exceptionResponse.getStatus());
     }
 }
