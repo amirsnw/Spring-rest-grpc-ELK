@@ -20,13 +20,21 @@ import java.util.Map;
 @Aspect
 public class RemoteLoggerAspect {
 
+    private static String extractPayload(RemoteLogger logger) {
+        String payload = logger.value();
+        if (payload == null || payload.isEmpty()) {
+            payload = logger.message();
+        }
+        return payload;
+    }
+
     @Before("@annotation(RemoteLogger)")
     public void afterReturningWithAnnotation(JoinPoint joinPoint) {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = (signature).getMethod();
         RemoteLogger logger = method.getAnnotation(RemoteLogger.class);
-        String payload = logger.value();
+        String payload = extractPayload(logger);
         RemoteLogger.LogType logType = logger.type();
         int[] argsIndex = logger.argumentsIndex();
 
