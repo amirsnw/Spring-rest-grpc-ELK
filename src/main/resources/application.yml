@@ -8,6 +8,8 @@ logging:
 spring:
   application:
     name: elkservice
+  profiles:
+    active: prod
 
 grpc:
   client:
